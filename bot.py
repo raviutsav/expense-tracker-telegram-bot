@@ -15,6 +15,7 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 EXPENSE_TABLE = os.getenv("EXPENSE_TABLE")
+DASHBOARD_HOST = "http://159.65.148.81:5000/"
 
 EXTRACTION_PROMPT = """
 You are an assistant that extracts structured expense information from a natural language sentence. 
@@ -132,7 +133,28 @@ async def add_expense(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"Description: {expense_data['description']}"
     )
     await update.message.reply_text(msg)
-
+    
+async def view_dashboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = None
+    try:
+        user_id = update.effective_user.id
+    except Exception as e:
+        print(f"An error occurred while fetching user_id: {e}")
+        msg = (
+            f"can't fetch user's id"
+        )
+        await update.message.reply_text(msg)
+        return
+    
+    user_dashboard_url = f"{DASHBOARD_HOST}?user_id={user_id}"
+    
+    await update.message.reply_text(
+    f"[View your dashboard]({user_dashboard_url})",
+    parse_mode='MarkdownV2',
+    disable_web_page_preview=True
+)
+    
+    
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Welcome! use /add to add expense.")
@@ -142,6 +164,7 @@ async def unknown(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Available commands:\n"
         "/start - Welcome message\n"
         "/add - Add expense\n"
+        "/view - View your expense dashboard"
     )
     await update.message.reply_text(msg)
 
@@ -150,6 +173,7 @@ def main():
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("add", add_expense))
+    app.add_handler(CommandHandler("view", view_dashboard))
     app.add_handler(MessageHandler(filters.COMMAND, unknown))
 
     print("Bot started...")
