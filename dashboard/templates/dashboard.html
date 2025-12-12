@@ -1,132 +1,185 @@
 <!DOCTYPE html>
-<html lang="en" class="">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
     <title>Expense Dashboard</title>
+
+    <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Config -->
     <script>
-      tailwind.config = { darkMode: 'class' }
+        tailwind.config = {
+            darkMode: 'class'
+        }
     </script>
+
+    <!-- UI Fixes -->
+    <style>
+        /* Light mode card */
+        .glass-light {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        /* Dark mode card */
+        .glass-dark {
+            background: rgba(31, 41, 55, 0.65); /* dark gray */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            transition: all 0.25s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        /* Mobile-friendly stacked table */
+        @media (max-width: 640px) {
+            table thead { display: none; }
+
+            table tr {
+                display: block;
+                margin-bottom: 1rem;
+                border-radius: 0.75rem;
+                padding: 0.75rem;
+            }
+
+            table td {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.45rem 0;
+            }
+
+            table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #6b7280;
+            }
+        }
+    </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen p-6">
 
-<div class="max-w-7xl mx-auto">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
 
-    <!-- Header with Night Mode Icon -->
-    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
-        <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100">Expense Dashboard</h1>
-        <button id="themeToggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 flex items-center justify-center">
-            <span id="themeIcon">
-                <!-- Moon icon by default (light mode) -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.66-8.66h-1M4.34 12h-1M16.95 7.05l-.7.7M7.75 16.25l-.7.7M16.95 16.95l-.7-.7M7.75 7.75l-.7-.7M12 5a7 7 0 100 14 7 7 0 000-14z" />
-                </svg>
-            </span>
-        </button>
+<!-- Sticky Header -->
+<header class="sticky top-0 z-50 bg-gray-100/90 dark:bg-gray-900/90 backdrop-blur shadow">
+    <div class="max-w-7xl mx-auto flex justify-between items-center p-4">
+        <h1 class="text-2xl sm:text-3xl font-bold">Expense Dashboard</h1>
+        <!-- <button id="themeToggle"
+            class="p-3 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+            <span id="themeIcon"></span>
+        </button> -->
     </div>
+</header>
 
-    <!-- Filter -->
-    <div class="mb-6 flex flex-wrap items-center gap-4">
-        <form method="get" class="flex gap-2">
-            <input 
-                type="text" 
-                name="user_id" 
-                placeholder="Filter by User ID" 
-                value="{{ user_id }}" 
-                class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-            >
-            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Apply</button>
-        </form>
-        <a href="/" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600">Reset Filter</a>
-    </div>
+<!-- Content -->
+<div class="max-w-7xl mx-auto px-4 py-6">
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-            <h2 class="text-gray-500 dark:text-gray-300">Total Spent</h2>
-            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">₹{{ "%.2f"|format(total_amount) }}</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-10">
+
+        <div class="glass-card glass-light dark:glass-dark shadow-lg rounded-xl p-6">
+            <h2 class="text-gray-600 dark:text-gray-300 text-sm">Total Spent</h2>
+            <p class="text-3xl font-bold mt-1">₹{{ "%.2f"|format(total_amount) }}</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-            <h2 class="text-gray-500 dark:text-gray-300">Total Credit</h2>
-            <p class="text-2xl font-bold text-green-500 dark:text-green-400">${{ "%.2f"|format(credit_total) }}</p>
+
+        <div class="glass-card glass-light dark:glass-dark shadow-lg rounded-xl p-6">
+            <h2 class="text-gray-600 dark:text-gray-300 text-sm">Total Credit</h2>
+            <p class="text-3xl font-bold text-green-500">₹{{ "%.2f"|format(credit_total) }}</p>
         </div>
-        
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-            <h2 class="text-gray-500 dark:text-gray-300">Total Debit</h2>
-            <p class="text-2xl font-bold text-red-500 dark:text-red-400">${{ "%.2f"|format(debit_total) }}</p>
-        </div>        
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-            <h2 class="text-gray-500 dark:text-gray-300">Total Transactions</h2>
-            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ total_records }}</p>
+
+        <div class="glass-card glass-light dark:glass-dark shadow-lg rounded-xl p-6">
+            <h2 class="text-gray-600 dark:text-gray-300 text-sm">Total Debit</h2>
+            <p class="text-3xl font-bold text-red-500">₹{{ "%.2f"|format(debit_total) }}</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-            <h2 class="text-gray-500 dark:text-gray-300">Average per Transaction</h2>
-            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                ₹{{ "%.2f"|format(total_amount / total_records if total_records else 0) }}
-            </p>
+
+        <div class="glass-card glass-light dark:glass-dark shadow-lg rounded-xl p-6">
+            <h2 class="text-gray-600 dark:text-gray-300 text-sm">Total Transactions</h2>
+            <p class="text-3xl font-bold">{{ total_records }}</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-            <h2 class="text-gray-500 dark:text-gray-300">Unique Categories</h2>
-            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ category_totals|length }}</p>
+
+        <div class="glass-card glass-light dark:glass-dark shadow-lg rounded-xl p-6">
+            <h2 class="text-gray-600 dark:text-gray-300 text-sm">Average per Transaction</h2>
+            <p class="text-3xl font-bold">₹{{ "%.2f"|format(total_amount / total_records if total_records else 0) }}</p>
         </div>
+
+        <div class="glass-card glass-light dark:glass-dark shadow-lg rounded-xl p-6">
+            <h2 class="text-gray-600 dark:text-gray-300 text-sm">Unique Categories</h2>
+            <p class="text-3xl font-bold">{{ category_totals|length }}</p>
+        </div>
+
     </div>
 
     <!-- Charts -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <!-- Expenses by Category -->
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-            <h2 class="text-gray-700 dark:text-gray-200 font-semibold mb-4">Expenses by Category</h2>
-            <div class="relative h-64 md:h-72">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+
+        <div class="glass-card glass-light dark:glass-dark shadow-lg rounded-xl p-6">
+            <h3 class="font-semibold mb-4">Expenses by Category</h3>
+            <div class="relative h-64 sm:h-80">
                 <canvas id="categoryChart"></canvas>
             </div>
         </div>
 
-        <!-- Expenses by Type -->
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-            <h2 class="text-gray-700 dark:text-gray-200 font-semibold mb-4">Expenses by Type</h2>
-            <div class="relative h-64 md:h-72">
+        <div class="glass-card glass-light dark:glass-dark shadow-lg rounded-xl p-6">
+            <h3 class="font-semibold mb-4">Expenses by Type</h3>
+            <div class="relative h-64 sm:h-80">
                 <canvas id="typeChart"></canvas>
             </div>
         </div>
 
-        <!-- Monthly Spending -->
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 md:col-span-2">
-            <h2 class="text-gray-700 dark:text-gray-200 font-semibold mb-4">Monthly Spending Trend</h2>
-            <div class="relative h-64 md:h-72">
+        <div class="glass-card glass-light dark:glass-dark shadow-lg rounded-xl p-6 md:col-span-2">
+            <h3 class="font-semibold mb-4">Monthly Spending Trend</h3>
+            <div class="relative h-64 sm:h-96">
                 <canvas id="monthlyChart"></canvas>
             </div>
         </div>
+
     </div>
 
     <!-- Expenses Table -->
-    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 overflow-x-auto mb-8">
-        <h2 class="text-gray-700 dark:text-gray-200 font-semibold mb-4">Expenses</h2>
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-700">
+    <div class="glass-card glass-light dark:glass-dark shadow-lg rounded-xl p-6 mb-10">
+        <h3 class="font-semibold mb-4">Recent Expenses</h3>
+
+        <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Created</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">User</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Category</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Amount</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Description</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold tracking-wider">ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold tracking-wider">Created</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold tracking-wider">User</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold tracking-wider">Category</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold tracking-wider">Amount</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold tracking-wider">Type</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold tracking-wider">Description</th>
                 </tr>
             </thead>
-            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+
+            <tbody>
                 {% for row in top_expenses %}
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 {% if row.type == 'credit' %}bg-green-50 dark:bg-green-800{% elif row.type == 'debit' %}bg-red-50 dark:bg-red-800{% endif %}">
-                    <td>{{ loop.index }}</td>
-                    <td>{{ row.created_at_readable }}</td>
-                    <td>{{ row.user_id }}</td>
-                    <td>{{ row.category or 'Uncategorized' }}</td>
-                    <td>${{ "%.2f"|format(row.amount) }}</td>
-                    <td>{{ row.type }}</td>
-                    <td>{{ row.description }}</td>
+                <tr class="transition hover:bg-gray-200/40 dark:hover:bg-gray-700/60 rounded"
+                    {% if row.type == 'credit' %}
+                        style="background-color: rgba(16, 185, 129, 0.15)"
+                    {% elif row.type == 'debit' %}
+                        style="background-color: rgba(239, 68, 68, 0.15)"
+                    {% endif %}>
+
+                    <td data-label="ID" class="px-6 py-3">{{ loop.index }}</td>
+                    <td data-label="Created" class="px-6 py-3">{{ row.created_at_readable }}</td>
+                    <td data-label="User" class="px-6 py-3">{{ row.user_id }}</td>
+                    <td data-label="Category" class="px-6 py-3">{{ row.category or 'Uncategorized' }}</td>
+                    <td data-label="Amount" class="px-6 py-3">₹{{ "%.2f"|format(row.amount) }}</td>
+                    <td data-label="Type" class="px-6 py-3">{{ row.type }}</td>
+                    <td data-label="Description" class="px-6 py-3">{{ row.description }}</td>
+
                 </tr>
-                
                 {% endfor %}
             </tbody>
         </table>
@@ -134,123 +187,150 @@
 
 </div>
 
-<!-- Charts & Night Mode JS -->
+<!-- Dark Mode + Charts JS -->
 <script>
 function getChartColors() {
     const isDark = document.documentElement.classList.contains('dark');
-    return { textColor: isDark ? '#f3f4f6' : '#111827', gridColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' };
+    return {
+        textColor: isDark ? '#f3f4f6' : '#111827',
+        gridColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'
+    };
 }
 
-// Category Chart
-const ctxCategory = document.getElementById('categoryChart').getContext('2d');
 let {textColor, gridColor} = getChartColors();
-const categoryChart = new Chart(ctxCategory, {
-    type: 'bar',
-    data: {
-        labels: {{ category_totals.keys()|list|tojson|safe }},
-        datasets: [{
-            label: 'Amount (₹)',
-            data: {{ category_totals.values()|list|tojson|safe }},
-            backgroundColor: 'rgba(59, 130, 246, 0.6)',
-            borderColor: 'rgba(59, 130, 246, 1)',
-            borderWidth: 1,
-            borderRadius: 5
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: textColor } } },
-        scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor }, grid: { color: gridColor }, beginAtZero: true } }
-    }
-});
 
-// Type Chart
-const ctxType = document.getElementById('typeChart').getContext('2d');
-const typeChart = new Chart(ctxType, {
-    type: 'pie',
-    data: {
-        labels: {{ type_totals.keys()|list|tojson|safe }},
-        datasets: [{
-            data: {{ type_totals.values()|list|tojson|safe }},
-            backgroundColor: [
-                'rgba(59, 130, 246, 0.6)',
-                'rgba(16, 185, 129, 0.6)',
-                'rgba(245, 158, 11, 0.6)',
-                'rgba(239, 68, 68, 0.6)',
-                'rgba(147, 51, 234, 0.6)'
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: textColor } } }
+/* CATEGORY CHART */
+const categoryChart = new Chart(
+    document.getElementById('categoryChart'),
+    {
+        type: 'bar',
+        data: {
+            labels: {{ category_totals.keys()|list|tojson|safe }},
+            datasets: [{
+                label: 'Amount (₹)',
+                data: {{ category_totals.values()|list|tojson|safe }},
+                backgroundColor: 'rgba(59,130,246,0.6)',
+                borderColor: 'rgba(59,130,246,1)',
+                borderWidth: 1,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: textColor } } },
+            scales: {
+                x: { ticks: { color: textColor }, grid: { color: gridColor }},
+                y: { ticks: { color: textColor }, grid: { color: gridColor }}
+            }
+        }
     }
-});
+);
 
-// Monthly Chart
-const ctxMonthly = document.getElementById('monthlyChart').getContext('2d');
-const monthlyChart = new Chart(ctxMonthly, {
-    type: 'line',
-    data: {
-        labels: {{ monthly_labels|tojson|safe }},
-        datasets: [{
-            label: 'Total Amount (₹)',
-            data: {{ monthly_values|tojson|safe }},
-            fill: true,
-            backgroundColor: 'rgba(59, 130, 246, 0.2)',
-            borderColor: 'rgba(59, 130, 246, 1)',
-            tension: 0.3
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: textColor } } },
-        scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor }, grid: { color: gridColor } } }
+/* TYPE CHART */
+const typeChart = new Chart(
+    document.getElementById('typeChart'),
+    {
+        type: 'pie',
+        data: {
+            labels: {{ type_totals.keys()|list|tojson|safe }},
+            datasets: [{
+                data: {{ type_totals.values()|list|tojson|safe }},
+                backgroundColor: [
+                    'rgba(59,130,246,0.6)',
+                    'rgba(16,185,129,0.6)',
+                    'rgba(245,158,11,0.6)',
+                    'rgba(239,68,68,0.6)',
+                    'rgba(147,51,234,0.6)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+                legend: { labels: { color: textColor } }
+            }
+        }
     }
-});
+);
 
-// Night Mode Toggle with Icon
+/* MONTHLY TREND */
+const monthlyChart = new Chart(
+    document.getElementById('monthlyChart'),
+    {
+        type: 'line',
+        data: {
+            labels: {{ monthly_labels|tojson|safe }},
+            datasets: [{
+                label: 'Total Amount (₹)',
+                data: {{ monthly_values|tojson|safe }},
+                fill: true,
+                backgroundColor: 'rgba(59,130,246,0.25)',
+                borderColor: 'rgba(59,130,246,1)',
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: textColor }}},
+            scales: {
+                x: { ticks: { color: textColor }, grid: { color: gridColor }},
+                y: { ticks: { color: textColor }, grid: { color: gridColor }}
+            }
+        }
+    }
+);
+
+/* DARK MODE TOGGLE */
 const toggleButton = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
 
-function setIcon() {
-    if(document.documentElement.classList.contains('dark')) {
-        // Sun icon for dark mode
+function updateIcon() {
+    if (document.documentElement.classList.contains('dark')) {
         themeIcon.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.66-8.66h-1M4.34 12h-1M16.95 7.05l-.7.7M7.75 16.25l-.7.7M16.95 16.95l-.7-.7M7.75 7.75l-.7-.7M12 5a7 7 0 100 14 7 7 0 000-14z" />
-            </svg>
-        `;
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-300"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 3v1m0 16v1m8.66-8.66h-1M4.34 12h-1
+                M16.95 7.05l-.7.7M7.75 16.25l-.7.7
+                M16.95 16.95l-.7-.7M7.75 7.75l-.7-.7M12 5a7 7 0 100 14 7 7 0 000-14z" />
+            </svg>`;
     } else {
-        // Moon icon for light mode
         themeIcon.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.66-8.66h-1M4.34 12h-1M16.95 7.05l-.7.7M7.75 16.25l-.7.7M16.95 16.95l-.7-.7M7.75 7.75l-.7-.7M12 5a7 7 0 100 14 7 7 0 000-14z" />
-            </svg>
-        `;
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 3v1m0 16v1m8.66-8.66h-1M4.34 12h-1
+                M16.95 7.05l-.7.7M7.75 16.25l-.7.7
+                M16.95 16.95l-.7-.7M7.75 7.75l-.7-.7
+                M12 5a7 7 0 100 14 7 7 0 000-14z" />
+            </svg>`;
     }
 }
 
-// Initialize icon
-setIcon();
+updateIcon();
 
+/* toggle mode */
 toggleButton.addEventListener('click', () => {
     document.documentElement.classList.toggle('dark');
-    setIcon();
+    updateIcon();
 
-    // Update chart colors
-    const colors = (() => {
-        const isDark = document.documentElement.classList.contains('dark');
-        return { textColor: isDark ? '#f3f4f6' : '#111827', gridColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' };
-    })();
+    const colors = getChartColors();
 
     [categoryChart, typeChart, monthlyChart].forEach(chart => {
         chart.options.plugins.legend.labels.color = colors.textColor;
-        if(chart.options.scales?.x) { chart.options.scales.x.ticks.color = colors.textColor; chart.options.scales.x.grid.color = colors.gridColor; }
-        if(chart.options.scales?.y) { chart.options.scales.y.ticks.color = colors.textColor; chart.options.scales.y.grid.color = colors.gridColor; }
+
+        if (chart.options.scales?.x) {
+            chart.options.scales.x.ticks.color = colors.textColor;
+            chart.options.scales.x.grid.color = colors.gridColor;
+        }
+        if (chart.options.scales?.y) {
+            chart.options.scales.y.ticks.color = colors.textColor;
+            chart.options.scales.y.grid.color = colors.gridColor;
+        }
+
         chart.update();
     });
 });

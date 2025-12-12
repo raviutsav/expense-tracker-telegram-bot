@@ -20,11 +20,12 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 @app.route("/")
 def dashboard():
     user_id = request.args.get("user_id")
+    data = []
     
     query = supabase.table("expense").select("*")
     if user_id:
         query = query.eq("user_id", user_id)
-    data = query.execute().data
+        data = query.execute().data
 
     total_amount = sum(row.get("amount", 0) for row in data)
     total_records = len(data)
