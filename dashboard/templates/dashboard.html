@@ -154,7 +154,6 @@
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-bold tracking-wider">ID</th>
                     <th class="px-6 py-3 text-left text-xs font-bold tracking-wider">Created</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold tracking-wider">User</th>
                     <th class="px-6 py-3 text-left text-xs font-bold tracking-wider">Category</th>
                     <th class="px-6 py-3 text-left text-xs font-bold tracking-wider">Amount</th>
                     <th class="px-6 py-3 text-left text-xs font-bold tracking-wider">Type</th>
@@ -173,7 +172,6 @@
 
                     <td data-label="ID" class="px-6 py-3">{{ loop.index }}</td>
                     <td data-label="Created" class="px-6 py-3">{{ row.created_at_readable }}</td>
-                    <td data-label="User" class="px-6 py-3">{{ row.user_id }}</td>
                     <td data-label="Category" class="px-6 py-3">{{ row.category or 'Uncategorized' }}</td>
                     <td data-label="Amount" class="px-6 py-3">₹{{ "%.2f"|format(row.amount) }}</td>
                     <td data-label="Type" class="px-6 py-3">{{ row.type }}</td>
