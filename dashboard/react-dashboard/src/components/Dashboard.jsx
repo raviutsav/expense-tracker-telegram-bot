@@ -90,7 +90,7 @@ const Dashboard = ({ onNavigate, userId, isAuthenticated }) => {
     return (
       <Layout currentPage="Dashboard" onNavigate={onNavigate} isAuthenticated={isAuthenticated}>
         <div className="flex items-center justify-center p-12">
-          <div className="text-lg text-slate-600 animate-pulse">Loading dashboard insights...</div>
+          <div className="text-lg text-muted-foreground animate-pulse">Loading dashboard insights...</div>
         </div>
       </Layout>
     );
@@ -109,8 +109,8 @@ const Dashboard = ({ onNavigate, userId, isAuthenticated }) => {
   if (!data) {
     return (
       <Layout onNavigate={onNavigate} isAuthenticated={isAuthenticated}>
-        <div className="rounded-xl border border-slate-200/60 bg-white p-6">
-          <p className="text-sm text-slate-600">No data available</p>
+        <div className="rounded-xl border border-border bg-card p-6">
+          <p className="text-sm text-muted-foreground">No data available</p>
         </div>
       </Layout>
     );

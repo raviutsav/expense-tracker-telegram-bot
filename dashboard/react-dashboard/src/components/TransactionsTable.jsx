@@ -45,8 +45,9 @@ const TransactionsTable = ({ expenses, onUpdate, onDelete }) => {
           bVal = new Date(b.created_at);
           break;
         case 'amount':
-          aVal = a.amount;
-          bVal = b.amount;
+          // Sort by signed value (Debit is negative, Credit is positive)
+          aVal = (a.type === 'debit' ? -1 : 1) * Number(a.amount);
+          bVal = (b.type === 'debit' ? -1 : 1) * Number(b.amount);
           break;
         case 'category':
           aVal = (a.category || '').toLowerCase();
@@ -96,7 +97,7 @@ const TransactionsTable = ({ expenses, onUpdate, onDelete }) => {
     return (
       <button
         onClick={() => handleSort(columnKey)}
-        className="flex items-center gap-1.5 hover:text-slate-900 transition-colors"
+        className="flex items-center gap-1.5 hover:text-foreground transition-colors"
       >
         {children}
         {isActive ? (
