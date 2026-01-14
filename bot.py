@@ -15,7 +15,7 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 EXPENSE_TABLE = os.getenv("EXPENSE_TABLE")
-DASHBOARD_HOST = "http://159.65.148.81:5000/"
+DASHBOARD_HOST = "http://139.59.63.158:5000/"
 
 EXTRACTION_PROMPT = """
 You are an assistant that extracts structured expense information from a natural language sentence. 
