@@ -123,11 +123,16 @@ const TransactionsTable = ({ expenses, onUpdate, onDelete }) => {
     });
   };
 
+  const [saveSuccess, setSaveSuccess] = useState(null); // id of saved item
+
   const handleSave = async () => {
     try {
       await onUpdate(editingId, editData);
+      const savedId = editingId;
       setEditingId(null);
       setEditData({});
+      setSaveSuccess(savedId);
+      setTimeout(() => setSaveSuccess(null), 2000);
     } catch (error) {
       console.error('Error updating expense:', error);
     }
@@ -290,7 +295,12 @@ const TransactionsTable = ({ expenses, onUpdate, onDelete }) => {
                           </Button>
                         </div>
                       ) : (
-                        <div className="flex gap-1 justify-end">
+                        <div className="flex gap-1 justify-end items-center">
+                          {saveSuccess === expense.id && (
+                            <span className="text-xs text-emerald-600 font-medium mr-2 animate-in fade-in zoom-in duration-300">
+                              Saved!
+                            </span>
+                          )}
                           <Button
                             size="sm"
                             variant="ghost"

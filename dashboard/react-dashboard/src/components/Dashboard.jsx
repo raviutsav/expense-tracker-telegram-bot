@@ -25,9 +25,9 @@ const Dashboard = ({ onNavigate, userId, isAuthenticated }) => {
     fetchData();
   }, [dateRange]);
 
-  const fetchData = async () => {
+  const fetchData = async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       // const urlParams = new URLSearchParams(window.location.search);
       // const userId = urlParams.get('user_id');
 
@@ -43,7 +43,7 @@ const Dashboard = ({ onNavigate, userId, isAuthenticated }) => {
       setError(err.message || 'Failed to load dashboard data');
       console.error('Error fetching data:', err);
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 
@@ -57,7 +57,7 @@ const Dashboard = ({ onNavigate, userId, isAuthenticated }) => {
         params: { user_id: userId },
       });
 
-      await fetchData();
+      await fetchData(true);
       return true;
     } catch (err) {
       console.error('Error updating expense:', err);
