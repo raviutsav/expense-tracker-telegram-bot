@@ -3,4 +3,5 @@ python-telegram-bot>=20.0
 google-genai
 supabase
 flask
+flask-cors
 gunicorn
